@@ -1,1 +1,69 @@
-/* You can add global styles to this file, and also import other style files */
+http, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+:root {
+  --fg: rgba(255, 255, 255, 0.87);
+  --fg-2: rgba(255, 255, 255, 0.75);
+  --fg-3: rgba(255, 255, 255, 0.65);
+  --fg-4: rgba(255, 255, 255, 0.6);
+  --fg-5: rgba(255, 255, 255, 0.4);
+  --bg: #160f09;
+  --bg-2: #1c130c;
+  --bg-3: #22170e;
+  --bg-4: #392618;
+  --accent: #efa7fa;
+
+  color: var(--fg);
+  background-color: var(--bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  font-family: monospace;
+}
+
+.btn-link {
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  color: var(--accent);
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+table, th, td {
+  border: solid 1px var(--fg-5);
+}
+
+th, td {
+  padding: .3rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.td-fit {
+  width: 1px;
+  white-space: nowrap;
+}

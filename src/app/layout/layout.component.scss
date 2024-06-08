@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: var(--bg-4);
+
+  h1 {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 1rem;
+    padding: .2rem;
+  }
+}
+
+.middle-section {
+  flex: 1;
+  display: flex;
+}
+
+main {
+  flex: 1;
+  padding: 1rem;
+}
+
+nav {
+  background-color: var(--bg-2);
+  width: 120px;
+}
+
+footer {
+  text-align: center;
+  border-top: solid 1px var(--fg-5);
+}

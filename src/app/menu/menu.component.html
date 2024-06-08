@@ -1,0 +1,11 @@
+<ul>
+  @for(mi of menu; track $index) {
+  <li>
+    @if(mi.external) {
+    <a [href]="mi.path" target="_blank">{{ mi.title }}</a>
+    } @else {
+    <a [routerLink]="mi.path">{{ mi.title }}</a>
+    }
+  </li>
+  }
+</ul>

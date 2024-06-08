@@ -1,0 +1,19 @@
+<table>
+  <thead>
+    <th>Name</th>
+    <th class="td-fit">Load state</th>
+    <th class="td-fit">Active state</th>
+    <th class="td-fit">Sub state</th>
+    <th>Description</th>
+  </thead>
+  <tbody>
+    @for(row of data(); track row.name) {
+    <tr>
+      <td><button class="btn-link">{{ row.name }}</button></td>
+      <td class="td-fit">{{ row.load_state }}</td>
+      <td class="td-fit">{{ row.active_state }}</td>
+      <td class="td-fir">{{ row.sub_state }}</td>
+      <td>{{ row.description }}</td>
+    }
+  </tbody>
+</table>
