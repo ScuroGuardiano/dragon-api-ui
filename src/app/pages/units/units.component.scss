@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+app-units-table {
+  display: block;
+  flex: 1;
+  overflow: scroll;
+}
+app-unit-details {
+  display: block;
+  flex: 1;
+}

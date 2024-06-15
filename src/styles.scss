@@ -57,10 +57,16 @@ table, th, td {
 th, td {
   padding: .3rem;
 }
+th {
+  background-color: black;
+  position: sticky;
+  top: 0;
+}
 
 table {
   width: 100%;
   border-collapse: collapse;
+  position: relative;
 }
 
 .td-fit {

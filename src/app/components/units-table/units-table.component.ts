@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { IUnitListEntry } from '../../services/unit.service';
 import { RouterLink } from '@angular/router';
 
@@ -11,4 +11,6 @@ import { RouterLink } from '@angular/router';
 })
 export class UnitsTableComponent {
   data = input<IUnitListEntry[]>([]);
+
+  unitClick = output<IUnitListEntry>();
 }

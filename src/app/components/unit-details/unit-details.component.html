@@ -1,1 +1,18 @@
-<p>unit-details works!</p>
+@if(unitInfo(); as i) {
+<p>
+  <span [className]="activeClass()">{{ activeGlyph() }}</span> {{ i.id }}
+  @if(i.description && i.description != i.id) {
+  {{' '}}- {{ i.description }}
+  }
+  <br/>
+</p>
+<p class="indent-1">
+  @if(i.following) {
+  Follows: unit currently follows state of
+  }
+</p>
+} @else if(error()) {
+<p class="error">Error: {{ error().message ?? "uknown" }}</p>
+} @else {
+<p>Loading...</p>
+}

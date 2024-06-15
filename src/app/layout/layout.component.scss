@@ -1,7 +1,7 @@
 :host {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 header {
@@ -18,11 +18,13 @@ header {
 .middle-section {
   flex: 1;
   display: flex;
+  overflow: auto;
 }
 
 main {
   flex: 1;
   padding: 1rem;
+  overflow-y: auto;
 }
 
 nav {

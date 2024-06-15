@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http'; import { Injectable, inject } from '@angular/core';
 import { ENDPOINTS } from '../backend';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { IUnitProp, listUnitProps } from '../common/unit-prop.decorator';
 
 // pub const UnitListEntry = struct {
 //     name: [:0]const u8,
@@ -31,6 +32,71 @@ export class UnitService {
       ENDPOINTS.unitProperties(path.path),
       { params: { props } }
     );
+  }
+
+  public getUnitPropertiesToObject<T>(path: Path, TargetCls: new() => T): Observable<T> {
+    const propsMap = new Map<string, IUnitProp>();
+    const unitProps = listUnitProps(TargetCls);
+    if (!unitProps) {
+      throw new Error(`Class ${TargetCls.name} doesn't have unit properties defined on it.`);
+    }
+    unitProps.forEach(p => propsMap.set(p.key, p));
+    const props = Array.from(propsMap.keys()).join(",");
+
+    return this.#http.get<IUnitProperties>(
+      ENDPOINTS.unitProperties(path.path),
+      { params: { props } }
+    ).pipe(
+      map(res => {
+        const ret = new TargetCls();
+        return this.mapPropertiesToTarget(propsMap, res, ret);
+      })
+    );
+  }
+
+  public getUnitPropertiesToObjectByName<T>(name: string, TargetCls: new() => T): Observable<T> {
+    const propsMap = new Map<string, IUnitProp>();
+    const unitProps = listUnitProps(TargetCls);
+    if (!unitProps) {
+      throw new Error(`Class ${TargetCls.name} doesn't have unit properties defined on it.`);
+    }
+    unitProps.forEach(p => propsMap.set(p.key, p));
+    const props = Array.from(propsMap.keys()).join(",");
+
+    return this.#http.get<IUnitProperties>(
+      ENDPOINTS.unitPropertiesByName(name),
+      { params: { props } }
+    ).pipe(
+      map(res => {
+        const ret = new TargetCls();
+        return this.mapPropertiesToTarget(propsMap, res, ret);
+      })
+    );
+  }
+
+  private mapPropertiesToTarget<T>(propsMap: Map<string, IUnitProp>, raw: IUnitProperties, target: T): T {
+    Object.keys(raw).forEach(key => {
+      const val = raw[key];
+      if (!val) {
+        return;
+      }
+
+      const prop = propsMap.get(key);
+      if (!prop) {
+        return;
+      }
+
+      if (prop.transform) {
+        // @ts-ignore
+        target[prop.property] = prop.transform(raw[prop.key]);
+      }
+      else {
+        // @ts-ignore
+        target[prop.property] = raw[prop.key];
+      }
+    });
+
+    return target;
   }
 }
 
