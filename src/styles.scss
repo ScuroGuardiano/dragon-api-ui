@@ -41,6 +41,16 @@ http, body {
   }
 }
 
+.error {
+  color: crimson;
+}
+.success {
+  color: lime;
+}
+.warning {
+  color: yellow;
+}
+
 a {
   color: var(--accent);
   text-decoration: none;

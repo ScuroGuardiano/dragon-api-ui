@@ -1,8 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { UnitsTableComponent } from "../../components/units-table/units-table.component";
 import { IUnitListEntry, UnitService } from '../../services/unit.service';
 import { AsyncPipe } from '@angular/common';
 import { UnitDetailsComponent } from "../../components/unit-details/unit-details.component";
+import { UnitDetailsService } from '../../services/unit-details.service';
 
 @Component({
     selector: 'app-units',
@@ -12,19 +13,13 @@ import { UnitDetailsComponent } from "../../components/unit-details/unit-details
     imports: [UnitsTableComponent, AsyncPipe, UnitDetailsComponent]
 })
 export class UnitsComponent {
+  constructor() {
+    effect(() => console.log(`Sex ${this.selectedUnit()}`));
+  }
+
   #unitService = inject(UnitService);
+  #unitDetails = inject(UnitDetailsService);
 
   units = this.#unitService.listUnits();
-
-  detailsRow = signal<IUnitListEntry | null>(null);
-  detailsPath = computed(() => this.detailsRow()?.path);
-
-  showUnitDetails(unit: IUnitListEntry) {
-    console.log(`Showing unit ${unit.path}`);
-    this.detailsRow.set(unit);
-  }
-
-  hideUnitDetails() {
-    this.detailsRow.set(null);
-  }
+  selectedUnit = this.#unitDetails.currentUnit;
 }

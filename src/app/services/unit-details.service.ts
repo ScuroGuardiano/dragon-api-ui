@@ -34,7 +34,7 @@ export class UnitDetailsService {
   }
 
   private getCurrentUnitFromQuery(): string | null {
-    const url = new URL(this.#router.url);
-    return url.searchParams.get("unit");
+    const url = this.#router.parseUrl(this.#router.url);
+    return url.queryParamMap.get("unit");
   }
 }

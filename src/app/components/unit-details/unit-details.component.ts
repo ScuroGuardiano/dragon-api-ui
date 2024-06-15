@@ -5,13 +5,14 @@ import { catchError, of, retry, switchMap } from 'rxjs';
 import { Path, UnitService } from '../../services/unit.service';
 import { AsyncPipe } from '@angular/common';
 import { GLYPHS } from '../../common/glyphs';
+import { UnitLinkComponent } from "../unit-link/unit-link.component";
 
 @Component({
-  selector: 'app-unit-details',
-  standalone: true,
-  imports: [AsyncPipe],
-  templateUrl: './unit-details.component.html',
-  styleUrl: './unit-details.component.scss'
+    selector: 'app-unit-details',
+    standalone: true,
+    templateUrl: './unit-details.component.html',
+    styleUrl: './unit-details.component.scss',
+    imports: [AsyncPipe, UnitLinkComponent]
 })
 export class UnitDetailsComponent {
   unitService = inject(UnitService);
@@ -60,20 +61,65 @@ export class UnitDetailsComponent {
   activeClass = computed(() => {
     const active = this.unitInfo()?.activeState;
     switch (active) {
-      case "failed": return "unit-failed";
+      case "failed": return "error";
 
       case "active":
       case "reloading":
-        return "unit-good";
+        return "success";
 
       default: return "";
     }
   });
 
-  handleError(err: any) {
+  loadClass = computed(() => {
+    const loadState = this.unitInfo()?.loadState;
+    if (loadState && ["error", "not-found", "bad-setting"].includes(loadState)) {
+      return "error";
+    }
+    if (loadState === "loaded") {
+      return "success";
+    }
+    return "";
+  });
+
+  enableClass = computed(() => {
+    const enableState = this.unitInfo()?.unitFileState;
+    return this.getEnableClass(enableState ?? "");
+  });
+
+  presetClass = computed(() => {
+    const presetState = this.unitInfo()?.unitFilePreset;
+    return this.getEnableClass(presetState ?? "");
+  })
+
+  unitFilePath = computed(() => {
+    const i = this.unitInfo();
+    if (!i) return "";
+    return i.sourcePath || i.fragmentPath;
+  })
+
+  isEmpty(s: string | undefined | null) {
+    if (!s) {
+      return true;
+    }
+    if (!s.trim()) {
+      return true;
+    }
+    return false;
+  }
+
+  private handleError(err: any) {
     console.error(err);
     this.error.set(err);
     return null;
+  }
+
+  private getEnableClass(enableState: string) {
+    switch(enableState) {
+      case "enabled": return "success";
+      case "disabled": return "warning";
+      default: return "";
+    }
   }
 }
 
@@ -100,7 +146,7 @@ class UnitStatusInfo {
   @UnitProp("TriggeredBy") triggeredBy!: string[];
   @UnitProp("Triggers") triggers!: string[];
 
-  @UnitProp("LoadError") loadError!: string;
+  @UnitProp("LoadError") loadError!: [string, string];
   @UnitProp("Result") result!: string;
 
   @UnitProp("InactiveExitTimestamp") inactiveExitTimestamp!: number;

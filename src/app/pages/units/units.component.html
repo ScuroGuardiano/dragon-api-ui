@@ -1,5 +1,5 @@
-<app-units-table [data]="(units | async) ?? []" (unitClick)="showUnitDetails($event)"/>
+<app-units-table [data]="(units | async) ?? []"/>
 
-@if(detailsPath()) {
-<app-unit-details [unitPathOrName]="detailsPath()!" />
+@if(selectedUnit()) {
+<app-unit-details [unitPathOrName]="selectedUnit()!" />
 }

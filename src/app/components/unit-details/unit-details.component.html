@@ -8,8 +8,22 @@
 </p>
 <p class="indent-1">
   @if(i.following) {
-  Follows: unit currently follows state of
+  Follows: unit currently follows state of <app-unit-link [pathOrName]="i.following">{{ i.following }}</app-unit-link>
   }
+  <br/>
+  <!-- Loaded -->
+  Loaded: <span [class]="loadClass()">{{ i.loadState }}</span>
+  @if(i.loadError[0]) {
+  (Reason: {{ i.loadError[1] }})
+  } @else if(unitFilePath() && i.unitFileState && !i.unitFilePreset) {
+  ({{ unitFilePath() }}; <span [class]="enableClass()">{{ i.unitFileState }}</span>)
+  } @else if(unitFilePath() && i.unitFileState && i.unitFilePreset) {
+  ({{ unitFilePath() }}; <span [class]="enableClass()">{{ i.unitFileState }}</span>; preset: <span [class]="presetClass()">{{ i.unitFilePreset }}</span>)
+  } @else if (unitFilePath()) {
+  ({{ unitFilePath() }})
+  }
+  <br/>
+  <!-- /Loaded -->
 </p>
 } @else if(error()) {
 <p class="error">Error: {{ error().message ?? "uknown" }}</p>
