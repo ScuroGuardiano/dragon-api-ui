@@ -1,18 +1,29 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { UnitProp } from '../../common/unit-prop.decorator';
-import { catchError, of, retry, switchMap } from 'rxjs';
+import { catchError, map, of, retry, switchMap, timestamp } from 'rxjs';
 import { Path, UnitService } from '../../services/unit.service';
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { GLYPHS } from '../../common/glyphs';
 import { UnitLinkComponent } from "../unit-link/unit-link.component";
+import { timestampIsSet } from '../../common/unit-utils';
+import { UsecTimespanPipe } from '../../pipes/usec-timespan.pipe';
+import { UsecTimestampRelativePipe } from '../../pipes/usec-timestamp-relative.pipe';
+import { UsecTimestampPipe } from '../../pipes/usec-timestamp.pipe';
 
 @Component({
-    selector: 'app-unit-details',
-    standalone: true,
-    templateUrl: './unit-details.component.html',
-    styleUrl: './unit-details.component.scss',
-    imports: [AsyncPipe, UnitLinkComponent]
+  selector: 'app-unit-details',
+  standalone: true,
+  templateUrl: './unit-details.component.html',
+  styleUrl: './unit-details.component.scss',
+  imports: [
+    AsyncPipe,
+    UnitLinkComponent,
+    UsecTimespanPipe,
+    UsecTimestampRelativePipe,
+    UsecTimestampPipe,
+    NgTemplateOutlet
+  ]
 })
 export class UnitDetailsComponent {
   unitService = inject(UnitService);
@@ -22,6 +33,8 @@ export class UnitDetailsComponent {
   */
   unitPathOrName = input.required<string>();
   error = signal<any>(undefined);
+
+  timestampIsSet = timestampIsSet;
 
   unitInfo$ = toObservable(this.unitPathOrName).pipe(
     switchMap(pathOrName => {
@@ -35,7 +48,7 @@ export class UnitDetailsComponent {
 
       return stream.pipe(
         retry(3),
-        catchError(err => of(this.handleError(err)))
+        catchError(err => of(this.handleError(err, true)))
       )
     })
   );
@@ -45,30 +58,14 @@ export class UnitDetailsComponent {
   activeGlyph = computed(() => {
     const active = this.unitInfo()?.activeState;
     if (active) {
-      switch (active) {
-        case "active": return GLYPHS.BLACK_CIRCLE;
-        case "reloading": return GLYPHS.CIRCLE_ARROW;
-        case "inactive": return GLYPHS.WHITE_CIRCLE;
-        case "failed": return GLYPHS.MULTIPLICATION_SIGN;
-        case "activating": return GLYPHS.BLACK_CIRCLE;
-        case "deactivating": return GLYPHS.BLACK_CIRCLE;
-        case "maintenance": return GLYPHS.WHITE_CIRCLE;
-      }
+      return this.activeStateToGlyph(active);
     }
     return "";
   });
 
   activeClass = computed(() => {
     const active = this.unitInfo()?.activeState;
-    switch (active) {
-      case "failed": return "error";
-
-      case "active":
-      case "reloading":
-        return "success";
-
-      default: return "";
-    }
+    return this.activeStateToClass(active ?? "");
   });
 
   loadClass = computed(() => {
@@ -98,6 +95,81 @@ export class UnitDetailsComponent {
     return i.sourcePath || i.fragmentPath;
   })
 
+  timestamp = computed(() => {
+    const i = this.unitInfo();
+    if (!i) return 0;
+
+    if (["active", "reloading"].includes(i.activeState)) {
+      return i.activeEnterTimestamp;
+    }
+
+    if (["inactive", "failed"].includes(i.activeState)) {
+      return i.inactiveEnterTimestamp;
+    }
+
+    if (i.activeState === "activating") {
+      return i.inactiveExitTimestamp;
+    }
+
+    return i.activeExitTimestamp;
+  });
+
+  untilTimestamp = computed(() => {
+    const i = this.unitInfo();
+    if (!i) return 0;
+
+    if (i.activeState != "active" && timestampIsSet(i.runtimeMaxSec)) {
+      return this.timestamp() + i.runtimeMaxSec;
+    }
+
+    return 0;
+  });
+
+  duration = computed(() => {
+    const i = this.unitInfo();
+    if (!i) return 0;
+
+    if (i.id.endsWith(".target")) {
+      return 0;
+    }
+
+    if (!["inactive", "failed"].includes(i.activeState)) {
+      return 0;
+    }
+
+    if (!timestampIsSet(i.activeEnterTimestamp) || !timestampIsSet(i.activeExitTimestamp)) {
+      return 0;
+    }
+
+    if (i.activeExitTimestamp >= i.activeEnterTimestamp) {
+      return i.activeExitTimestamp - i.activeEnterTimestamp;
+    }
+
+    return 0;
+  });
+
+  triggeredBy = computed(() => {
+    const i = this.unitInfo();
+    if (!i?.triggeredBy) {
+      return [];
+    }
+
+    return i.triggeredBy.map(t => {
+      const tActiveData$ = this.activeStateByName(t).pipe(
+        map(a => ({
+          state: a,
+          glyph: this.activeStateToGlyph(a),
+          class: this.activeStateToClass(a)
+        }))
+      );
+
+      return {
+        name: t,
+        activeData$: tActiveData$
+      }
+    });
+  });
+
   isEmpty(s: string | undefined | null) {
     if (!s) {
       return true;
@@ -108,9 +180,11 @@ export class UnitDetailsComponent {
     return false;
   }
 
-  private handleError(err: any) {
+  private handleError(err: any, fatal = false) {
     console.error(err);
-    this.error.set(err);
+    if (fatal) {
+      this.error.set(err);
+    }
     return null;
   }
 
@@ -120,6 +194,39 @@ export class UnitDetailsComponent {
       case "disabled": return "warning";
       default: return "";
     }
+  }
+
+  private activeStateToGlyph(activeState: string): string {
+      switch (activeState) {
+        case "active": return GLYPHS.BLACK_CIRCLE;
+        case "reloading": return GLYPHS.CIRCLE_ARROW;
+        case "inactive": return GLYPHS.WHITE_CIRCLE;
+        case "failed": return GLYPHS.MULTIPLICATION_SIGN;
+        case "activating": return GLYPHS.BLACK_CIRCLE;
+        case "deactivating": return GLYPHS.BLACK_CIRCLE;
+        case "maintenance": return GLYPHS.WHITE_CIRCLE;
+        default: return "";
+      }
+  }
+  private activeStateToClass(activeState: string): string {
+    switch (activeState) {
+      case "failed": return "error";
+
+      case "active":
+      case "reloading":
+        return "success";
+
+      default: return "";
+    }
+  }
+  private activeStateByName(name: string) {
+    return this.unitService.getUnitActiveStateByName(name).pipe(
+      retry(3),
+      catchError(err => {
+        this.handleError(err);
+        return of("");
+      })
+    );
   }
 }
 
@@ -152,7 +259,7 @@ class UnitStatusInfo {
   @UnitProp("InactiveExitTimestamp") inactiveExitTimestamp!: number;
   @UnitProp("InactiveExitTimestampMonotonic") inactiveExitTimestampMonotonic!: number;
   @UnitProp("ActiveEnterTimestamp") activeEnterTimestamp!: number;
-  @UnitProp("ActiveExitTImestamp") activeExitTimestamp!: number;
+  @UnitProp("ActiveExitTimestamp") activeExitTimestamp!: number;
   @UnitProp("InactiveEnterTimestamp") inactiveEnterTimestamp!: number;
 
   @UnitProp("RuntimeMaxSec") runtimeMaxSec!: number;

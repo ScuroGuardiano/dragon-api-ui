@@ -11,6 +11,7 @@
   Follows: unit currently follows state of <app-unit-link [pathOrName]="i.following">{{ i.following }}</app-unit-link>
   }
   <br/>
+
   <!-- Loaded -->
   Loaded: <span [class]="loadClass()">{{ i.loadState }}</span>
   @if(i.loadError[0]) {
@@ -24,6 +25,51 @@
   }
   <br/>
   <!-- /Loaded -->
+
+  @if(i.transient) {
+  Transient: yes<br/>
+  }
+
+  <!-- Active and Timestamp -->
+  Active: <span [class]="activeClass()">{{ i.activeState }}
+  @if(i.activeState != i.subState && i.subState) {
+   ({{ i.subState }})
+  }
+  </span>
+  @if(i.freezerState && i.freezerState != "running") {
+  <span class="warning">({{ i.freezerState }})</span>
+  }
+  @if(i.result && i.result != "success") {
+  (Result: {{ i.result }})
+  }
+  <!-- Timestamp -->
+  @if (timestampIsSet(timestamp())) {
+  since {{ timestamp() | usecTimestamp }}; {{ timestamp() | usecTimestampRelative }}<br/>
+  }
+  @if (timestampIsSet(untilTimestamp())) {
+  <span class="indent-1">Until: {{ untilTimestamp() | usecTimestamp }}; {{ untilTimestamp() | usecTimestampRelative }}</span><br/>
+  }
+  @if (timestampIsSet(duration())) {
+  Duration: {{ duration() | usecTimespan }}<br/>
+  }
+  <!-- /Timestamp -->
+  <!-- /Active and Timestamp -->
+
+  <!-- TriggeredBy -->
+  @for(t of triggeredBy(); track t.name; let i = $index) {
+  <ng-template #triggeredContent>
+    @if(t.activeData$ | async; as activeData) {
+    <span [class]="activeData.class">{{ activeData.glyph }}</span>{{' '}}
+    }
+    <app-unit-link [pathOrName]="t.name">{{ t.name }}</app-unit-link>
+  </ng-template>
+  @if (i == 0) {
+  TriggeredBy: <ng-container *ngTemplateOutlet="triggeredContent" />
+  } @else {
+  <span class="indent-2"><ng-container *ngTemplateOutlet="triggeredContent" /></span>
+  }
+  }
+  <!-- /TriggeredBy-->
 </p>
 } @else if(error()) {
 <p class="error">Error: {{ error().message ?? "uknown" }}</p>

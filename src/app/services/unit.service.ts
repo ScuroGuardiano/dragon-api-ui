@@ -74,6 +74,15 @@ export class UnitService {
     );
   }
 
+  public getUnitActiveStateByName(name: string): Observable<string> {
+    return this.#http.get<IUnitProperties>(
+      ENDPOINTS.unitPropertiesByName(name),
+      { params: { props: "ActiveState" } }
+    ).pipe(
+      map(res => (res["ActiveState"] ?? "") as string)
+    );
+  }
+
   private mapPropertiesToTarget<T>(propsMap: Map<string, IUnitProp>, raw: IUnitProperties, target: T): T {
     Object.keys(raw).forEach(key => {
       const val = raw[key];
@@ -131,3 +140,4 @@ export interface IDictEntry<T> {
 }
 
 export type UnitPropertyType = boolean | string | number | UnitPropertyType[] | IDictEntry<UnitPropertyType>[];
+
