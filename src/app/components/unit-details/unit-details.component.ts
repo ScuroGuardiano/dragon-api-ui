@@ -45,7 +45,7 @@ export class UnitDetailsComponent {
       else {
         stream = this.unitService.getUnitPropertiesToObjectByName(pathOrName, UnitStatusInfo);
       }
-
+      
       return stream.pipe(
         retry(3),
         catchError(err => of(this.handleError(err, true)))

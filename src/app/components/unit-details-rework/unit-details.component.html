@@ -1,0 +1,46 @@
+@if(unitInfo(); as i) {
+<p>
+  <span [className]="activeClass()">{{ activeGlyph() }}</span> {{ i.id }}
+  @if(i.description && i.description != i.id) {
+  {{' '}}- {{ i.description }}
+  }
+  <br />
+</p>
+<table>
+  <tbody>
+    @for(line of formatted(); track $index) {
+      <tr>
+        <td class="td-fit details-column">{{ line.column ? line.column + ':' : "" }}</td>
+        <td>
+          @for(fragment of line.content; track $index) {
+            @if(fragment.async) {
+              @if (fragment.value | async; as fragment) {
+                @if(fragment.link) {
+                  <app-unit-link [class]="fragment.class ?? ''" [pathOrName]="fragment.link">{{ fragment.value }}</app-unit-link>
+                }
+                @else {
+                  <!-- Usage of span will prevent HTML from adding extra space -->
+                  <span [class]="fragment.class ?? ''">{{ fragment.value }}</span>
+                }
+              }
+            }
+            @else {
+              @if(fragment.link) {
+                <app-unit-link [class]="fragment.class ?? ''" [pathOrName]="fragment.link">{{ fragment.value }}</app-unit-link>
+              }
+              @else {
+                <!-- Usage of span will prevent HTML from adding extra space -->
+                <span [class]="fragment.class ?? ''">{{ fragment.value }}</span>
+              }
+            }
+          }
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
+} @else if(error()) {
+<p class="error">Error: {{ error().message ?? "uknown" }}</p>
+} @else {
+<p>Loading...</p>
+}

@@ -86,7 +86,7 @@ export class UnitService {
   private mapPropertiesToTarget<T>(propsMap: Map<string, IUnitProp>, raw: IUnitProperties, target: T): T {
     Object.keys(raw).forEach(key => {
       const val = raw[key];
-      if (!val) {
+      if (val == null) {
         return;
       }
 

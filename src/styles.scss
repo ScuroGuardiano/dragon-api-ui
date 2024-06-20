@@ -50,6 +50,12 @@ http, body {
 .warning {
   color: yellow;
 }
+.uwu {
+  color: rgb(255, 78, 193);
+}
+.gray {
+  color: var(--fg-3);
+}
 
 a {
   color: var(--accent);

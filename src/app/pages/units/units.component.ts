@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { UnitsTableComponent } from "../../components/units-table/units-table.component";
 import { IUnitListEntry, UnitService } from '../../services/unit.service';
 import { AsyncPipe } from '@angular/common';
-import { UnitDetailsComponent } from "../../components/unit-details/unit-details.component";
+import { UnitDetailsComponent } from "../../components/unit-details-rework/unit-details.component";
 import { UnitDetailsService } from '../../services/unit-details.service';
 
 @Component({

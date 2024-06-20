@@ -6,12 +6,11 @@ export function typeFromPathOrName(pathOrName: string): string {
   return pathOrName.substring(pathOrName.lastIndexOf(searched) + searched.length);
 }
 
-const TIMESTAMP_MAX = Math.pow(2, 63);
-export function timestampIsSet(ts: number) {
-  // Alright, so systemd represents sometimes unset timestamp as UINT64_MAX
-  // Javascript can't represent such a large number with accuracy
-  // So I'll just compare it with 2^63, it's close enough and we will never reach
-  // timestamp of 2^63 in nanoseconds is 11 April 2262, so I don't care :3
-  return ts > 0 && ts < TIMESTAMP_MAX;
-}
+// Alright, the problem is javascript can store safely numbers up to 2^53 but it works properly for my usecase XD
+// I don't use it to do `==` but `<`. Btw (2^64 - 1..1024) < 2^64 is false as a result of this inaccuracy
+// So in theory number 2^64 - 1024 would be treaten as invalid but in reality no variable should reach that high value
+export const PROBABLY_NOT_TOO_ACCURATE_MAX_UINT64 = Math.pow(2, 64);
 
+export function timestampIsSet(ts: number) {
+  return ts > 0 && ts < PROBABLY_NOT_TOO_ACCURATE_MAX_UINT64;
+}

@@ -4,13 +4,13 @@
   @if(i.description && i.description != i.id) {
   {{' '}}- {{ i.description }}
   }
-  <br/>
+  <br />
 </p>
 <p class="indent-1">
   @if(i.following) {
   Follows: unit currently follows state of <app-unit-link [pathOrName]="i.following">{{ i.following }}</app-unit-link>
   }
-  <br/>
+  <br />
 
   <!-- Loaded -->
   Loaded: <span [class]="loadClass()">{{ i.loadState }}</span>
@@ -19,22 +19,23 @@
   } @else if(unitFilePath() && i.unitFileState && !i.unitFilePreset) {
   ({{ unitFilePath() }}; <span [class]="enableClass()">{{ i.unitFileState }}</span>)
   } @else if(unitFilePath() && i.unitFileState && i.unitFilePreset) {
-  ({{ unitFilePath() }}; <span [class]="enableClass()">{{ i.unitFileState }}</span>; preset: <span [class]="presetClass()">{{ i.unitFilePreset }}</span>)
+  ({{ unitFilePath() }}; <span [class]="enableClass()">{{ i.unitFileState }}</span>; preset: <span
+    [class]="presetClass()">{{ i.unitFilePreset }}</span>)
   } @else if (unitFilePath()) {
   ({{ unitFilePath() }})
   }
-  <br/>
+  <br />
   <!-- /Loaded -->
 
   @if(i.transient) {
-  Transient: yes<br/>
+  Transient: yes<br />
   }
 
   <!-- Active and Timestamp -->
   Active: <span [class]="activeClass()">{{ i.activeState }}
-  @if(i.activeState != i.subState && i.subState) {
-   ({{ i.subState }})
-  }
+    @if(i.activeState != i.subState && i.subState) {
+    ({{ i.subState }})
+    }
   </span>
   @if(i.freezerState && i.freezerState != "running") {
   <span class="warning">({{ i.freezerState }})</span>
@@ -44,13 +45,14 @@
   }
   <!-- Timestamp -->
   @if (timestampIsSet(timestamp())) {
-  since {{ timestamp() | usecTimestamp }}; {{ timestamp() | usecTimestampRelative }}<br/>
+  since {{ timestamp() | usecTimestamp }}; {{ timestamp() | usecTimestampRelative }}<br />
   }
   @if (timestampIsSet(untilTimestamp())) {
-  <span class="indent-1">Until: {{ untilTimestamp() | usecTimestamp }}; {{ untilTimestamp() | usecTimestampRelative }}</span><br/>
+  <span class="indent-1">Until: {{ untilTimestamp() | usecTimestamp }}; {{ untilTimestamp() | usecTimestampRelative
+    }}</span><br />
   }
   @if (timestampIsSet(duration())) {
-  Duration: {{ duration() | usecTimespan }}<br/>
+  Duration: {{ duration() | usecTimespan }}<br />
   }
   <!-- /Timestamp -->
   <!-- /Active and Timestamp -->
